@@ -12,6 +12,7 @@ import { MermaidBlock } from './MermaidBlock';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useResizable } from '../hooks/useResizable';
 import { findLineElement, scrollToElement } from '../lib/scrollToElement';
+import { parseMdContent } from '../lib/parseMdContent';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -132,6 +133,7 @@ export const MarkdownPreview = ({
   const internalContentRef = useRef<HTMLDivElement>(null);
   const contentRef = externalContentRef ?? internalContentRef;
   const { isDark } = useDarkMode();
+  const { frontmatter, body } = parseMdContent(content, filename);
   const {
     width: commentsSidebarWidth,
     isResizing,
@@ -208,6 +210,16 @@ export const MarkdownPreview = ({
       <div className="markdown-container">
         <header className="markdown-header">
           <h1>{filename}</h1>
+          {Object.keys(frontmatter).length > 0 && (
+            <dl className="frontmatter-block">
+              {Object.entries(frontmatter).map(([key, value]) => (
+                <div key={key} className="frontmatter-row">
+                  <dt>{key}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </header>
         <div className="markdown-content" ref={contentRef}>
           <ReactMarkdown
@@ -215,7 +227,7 @@ export const MarkdownPreview = ({
             rehypePlugins={[rehypeHighlight]}
             components={componentsWithLinePosition}
           >
-            {content}
+            {body}
           </ReactMarkdown>
         </div>
         <SelectionPopover containerRef={contentRef} onSubmitComment={handleSubmitComment} />

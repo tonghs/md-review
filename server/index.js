@@ -56,7 +56,7 @@ const sseClients = new Set();
 
 // Check if file has markdown extension
 function isMarkdownFile(filename) {
-  return filename.endsWith('.md') || filename.endsWith('.markdown');
+  return filename.endsWith('.md') || filename.endsWith('.markdown') || filename.endsWith('.mdx');
 }
 
 // Security helper: resolve path and prevent traversal
