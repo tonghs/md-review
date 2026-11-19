@@ -1,12 +1,21 @@
 import { useMarkdown } from '../hooks/useMarkdown';
 import { useFileWatch } from '../hooks/useFileWatch';
 import { useReviewFile } from '../hooks/useReviewFile';
+import { useOutlineNavigation } from '../hooks/useOutlineNavigation';
 import { MarkdownPreview } from './MarkdownPreview';
 import { ErrorDisplay } from './ErrorDisplay';
+import { Outline } from './Outline';
+import { SidebarPanes } from './SidebarPanes';
+import { SidebarLayout, SidebarCollapseButton, OutlineIcon } from './SidebarLayout';
+import { ThemeToggle } from './ThemeToggle';
 
 export const CliModeApp = () => {
   const { content, filename, loading, error, reload } = useMarkdown();
   const { comments, setComments, saving, saveNow } = useReviewFile({ filePath: null });
+  const ready = Boolean(!loading && !error && content && filename);
+  const { previewRef, activeLine, navigateToHeading } = useOutlineNavigation(
+    ready ? content : null,
+  );
 
   // Watch for file changes and reload
   useFileWatch(() => {
@@ -41,13 +50,37 @@ export const CliModeApp = () => {
   }
 
   return (
-    <MarkdownPreview
-      content={content}
-      filename={filename}
-      comments={comments}
-      onCommentsChange={setComments}
-      saving={saving}
-      onSaveNow={saveNow}
-    />
+    <SidebarLayout
+      openIcon={<OutlineIcon />}
+      openTitle="Open outline"
+      renderSidebar={(close) => (
+        <SidebarPanes
+          renderOutline={() => (
+            <Outline
+              content={content}
+              comments={comments}
+              activeLine={activeLine}
+              onNavigate={navigateToHeading}
+              headerActions={
+                <>
+                  <ThemeToggle />
+                  <SidebarCollapseButton onClick={close} />
+                </>
+              }
+            />
+          )}
+        />
+      )}
+    >
+      <MarkdownPreview
+        content={content}
+        filename={filename}
+        comments={comments}
+        onCommentsChange={setComments}
+        saving={saving}
+        onSaveNow={saveNow}
+        contentRef={previewRef}
+      />
+    </SidebarLayout>
   );
 };

@@ -74,6 +74,8 @@ Mode detection happens in `App.tsx` via `/api/files` endpoint availability.
 - `CommentList`: Manages inline comments (persisted to `.review.json` via `useReviewFile`; legacy localStorage migrated on first load)
 - `SelectionPopover`: Text selection UI for adding comments
 - `FileTree`: Directory browser with search
+- `Outline`: Heading outline (H1–H6, foldable, active-section tracking, per-section comment counts). Parsing lives in `src/lib/outline.ts`; scroll tracking in `useActiveHeading`
+- `SidebarLayout` / `SidebarPanes`: Shared left sidebar shell (resizable, folds to icon bar) with files stacked above the outline (draggable divider, fold state in localStorage)
 
 ### Data Flow
 

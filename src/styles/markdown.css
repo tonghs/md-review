@@ -135,10 +135,20 @@
   padding-left: 0;
 }
 
+/* Leave breathing room above headings scrolled to from the outline */
+.markdown-content :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 16px;
+}
+
 .markdown-content .highlight-line {
   animation: highlight-fade 2s ease-out;
   background-color: rgb(88 166 255 / 20%);
   border-radius: 3px;
+}
+
+/* Pad the highlight without shifting layout. Headings keep their own margins:
+   overriding them would move content mid-scroll and misplace the target. */
+.markdown-content .highlight-line:not(h1, h2, h3, h4, h5, h6) {
   padding: 0.25rem;
   margin: -0.25rem;
 }

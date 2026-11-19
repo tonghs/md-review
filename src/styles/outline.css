@@ -1,0 +1,229 @@
+.outline-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: var(--bg-secondary);
+}
+
+.outline-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px 0 8px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.outline-panel.collapsed .outline-header {
+  border-bottom: none;
+}
+
+.outline-header-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outline-header-toggle.static {
+  padding-left: 8px;
+  cursor: default;
+}
+
+.outline-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.outline-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.outline-header-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.outline-header-action:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.outline-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.outline-chevron {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease-in-out;
+}
+
+.outline-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.outline-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+.outline-empty {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.outline-tree,
+.outline-tree ul {
+  list-style: none;
+}
+
+.outline-item {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding-right: 8px;
+  border-left: 2px solid transparent;
+  transition: background-color 0.1s;
+}
+
+.outline-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.outline-item.active {
+  background-color: rgb(88 166 255 / 15%);
+  border-left-color: var(--link-color);
+}
+
+.outline-toggle,
+.outline-toggle-spacer {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.outline-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.outline-toggle:hover .outline-chevron {
+  color: var(--text-primary);
+}
+
+.outline-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 4px 2px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outline-link:focus-visible,
+.outline-toggle:focus-visible,
+.outline-header-toggle:focus-visible,
+.outline-header-action:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: -2px;
+}
+
+.outline-link.depth-1 {
+  font-weight: 600;
+}
+
+.outline-link.depth-4,
+.outline-link.depth-5,
+.outline-link.depth-6 {
+  color: var(--text-secondary);
+}
+
+.outline-item.active .outline-link {
+  color: var(--link-color);
+}
+
+.outline-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outline-comment-count {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.outline-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.outline-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.outline-body::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+.outline-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}

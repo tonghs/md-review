@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, RefObject } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -11,6 +11,7 @@ import { CommentList, Comment } from './CommentList';
 import { MermaidBlock } from './MermaidBlock';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useResizable } from '../hooks/useResizable';
+import { findLineElement, scrollToElement } from '../lib/scrollToElement';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -20,6 +21,8 @@ interface MarkdownPreviewProps {
   onCommentsChange: (comments: Comment[]) => void;
   saving?: boolean;
   onSaveNow?: () => Promise<void>;
+  /** Ref to the rendered content; pass one to locate headings from outside (outline) */
+  contentRef?: RefObject<HTMLDivElement | null>;
 }
 
 // Components that add data-line-start attribute to elements
@@ -124,8 +127,10 @@ export const MarkdownPreview = ({
   onCommentsChange,
   saving,
   onSaveNow,
+  contentRef: externalContentRef,
 }: MarkdownPreviewProps) => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const internalContentRef = useRef<HTMLDivElement>(null);
+  const contentRef = externalContentRef ?? internalContentRef;
   const { isDark } = useDarkMode();
   const {
     width: commentsSidebarWidth,
@@ -191,19 +196,8 @@ export const MarkdownPreview = ({
 
   const handleLineClick = (line: number) => {
     if (!contentRef.current) return;
-
-    // Find the element with the matching line number
-    const element = contentRef.current.querySelector(`[data-line-start="${line}"]`);
-    if (element) {
-      // Scroll to the element
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Add highlight animation
-      element.classList.add('highlight-line');
-      setTimeout(() => {
-        element.classList.remove('highlight-line');
-      }, 2000);
-    }
+    const element = findLineElement(contentRef.current, line);
+    if (element) scrollToElement(element);
   };
 
   return (

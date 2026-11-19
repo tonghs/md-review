@@ -58,6 +58,7 @@
     "chokidar": "^5.0.0",
     "highlight.js": "^11.11.1",
     "hono": "^4.10.6",
+    "mdast-util-to-string": "^4.0.0",
     "mermaid": "^11.12.2",
     "mri": "^1.2.0",
     "open": "^11.0.0",
@@ -67,6 +68,8 @@
     "rehype-highlight": "^7.0.2",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
     "vite": "^6.0.3"
   },
   "devDependencies": {
