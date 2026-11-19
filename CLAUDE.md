@@ -30,7 +30,7 @@ This repo is a fork of [`ryo-manba/md-review`](https://github.com/ryo-manba/md-r
 To check for and pull in upstream improvements:
 
 ```bash
-# One-time: add the upstream remote (origin is dfpersonal/md-review)
+# One-time: add the upstream remote (origin is tonghs/md-review)
 git remote add upstream https://github.com/ryo-manba/md-review.git
 
 # Each sync:

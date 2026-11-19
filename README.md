@@ -23,7 +23,7 @@ Comments can be copied and used as feedback for AI agents.
 ## Install
 
 ```sh
-git clone https://github.com/dfpersonal/md-review.git ~/md-review && cd ~/md-review && pnpm install && pnpm build && npm install -g .
+git clone https://github.com/tonghs/md-review.git ~/md-review && cd ~/md-review && pnpm install && pnpm build && npm install -g .
 ```
 
 ## Usage
