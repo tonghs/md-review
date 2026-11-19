@@ -2,8 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Comment } from '../components/CommentList';
 
 interface UseReviewFileOptions {
-  /** Relative file path for dev mode, or null for CLI mode */
-  filePath: string | null;
+  /**
+   * Relative file path (dev mode), `undefined` for the single CLI-mode file,
+   * or `null` when no file is selected (nothing is loaded or saved).
+   * Mirrors the convention of `useMarkdown`.
+   */
+  filePath?: string | null;
 }
 
 interface UseReviewFileReturn {
@@ -15,8 +19,8 @@ interface UseReviewFileReturn {
 
 const DEBOUNCE_MS = 1000;
 
-function apiUrl(filePath: string | null): string {
-  if (filePath === null) return '/api/reviews';
+export function apiUrl(filePath: string | undefined): string {
+  if (filePath === undefined) return '/api/reviews';
   return `/api/reviews/${encodeURIComponent(filePath)}`;
 }
 
@@ -46,17 +50,19 @@ export function useReviewFile({ filePath }: UseReviewFileOptions): UseReviewFile
   const [comments, setCommentsState] = useState<Comment[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Track current comments for the debounce flush
+  // Latest comments / path, for user-initiated saves (saveNow)
   const commentsRef = useRef<Comment[]>(comments);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingRef = useRef(false);
   const filePathRef = useRef(filePath);
-
-  // Keep refs in sync
   commentsRef.current = comments;
   filePathRef.current = filePath;
 
-  const doSave = useCallback(async (toSave: Comment[], fp: string | null) => {
+  // A debounced save captures its comments and target path when scheduled, so
+  // switching files before it fires can never write one file's comments into
+  // another file's review.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = useRef<{ comments: Comment[]; filePath: string | undefined } | null>(null);
+
+  const doSave = useCallback(async (toSave: Comment[], fp: string | undefined) => {
     setSaving(true);
     try {
       if (toSave.length === 0) {
@@ -72,45 +78,55 @@ export function useReviewFile({ filePath }: UseReviewFileOptions): UseReviewFile
       console.error('Failed to save review file:', err);
     } finally {
       setSaving(false);
-      pendingRef.current = false;
     }
   }, []);
+
+  /** Saves the pending debounced change right away, if there is one. */
+  const flushPending = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (pending) return doSave(pending.comments, pending.filePath);
+  }, [doSave]);
 
   const saveNow = useCallback(async () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    await doSave(commentsRef.current, filePathRef.current);
-  }, [doSave]);
-
-  const scheduleSave = useCallback(() => {
-    pendingRef.current = true;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null;
-      doSave(commentsRef.current, filePathRef.current);
-    }, DEBOUNCE_MS);
+    pendingRef.current = null;
+    const fp = filePathRef.current;
+    if (fp === null) return;
+    await doSave(commentsRef.current, fp);
   }, [doSave]);
 
   // Wrapper that accepts functional updates like useState
   const setComments = useCallback(
     (value: Comment[] | ((prev: Comment[]) => Comment[])) => {
+      const fp = filePathRef.current;
       setCommentsState((prev) => {
         const next = typeof value === 'function' ? value(prev) : value;
-        // Schedule after state updates
-        setTimeout(() => scheduleSave(), 0);
+        if (fp !== null) {
+          pendingRef.current = { comments: next, filePath: fp };
+          if (timerRef.current) clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => {
+            void flushPending();
+          }, DEBOUNCE_MS);
+        }
         return next;
       });
     },
-    [scheduleSave],
+    [flushPending],
   );
 
   // Load comments on mount / file change
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    async function load(filePath: string | undefined) {
       try {
         const res = await fetch(apiUrl(filePath));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -163,26 +179,18 @@ export function useReviewFile({ filePath }: UseReviewFileOptions): UseReviewFile
       }
     }
 
-    load();
+    if (filePath === null) {
+      setCommentsState([]);
+    } else {
+      load(filePath);
+    }
 
     return () => {
       cancelled = true;
+      // Save edits made just before switching files to the file they belong to.
+      void flushPending();
     };
-  }, [filePath]);
-
-  // Flush on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      if (pendingRef.current) {
-        // Fire-and-forget flush
-        doSave(commentsRef.current, filePathRef.current);
-      }
-    };
-  }, [doSave]);
+  }, [filePath, flushPending]);
 
   return { comments, setComments, saving, saveNow };
 }

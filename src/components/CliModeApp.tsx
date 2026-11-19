@@ -11,7 +11,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 export const CliModeApp = () => {
   const { content, filename, loading, error, reload } = useMarkdown();
-  const { comments, setComments, saving, saveNow } = useReviewFile({ filePath: null });
+  const { comments, setComments, saving, saveNow } = useReviewFile({});
   const ready = Boolean(!loading && !error && content && filename);
   const { previewRef, activeLine, navigateToHeading } = useOutlineNavigation(
     ready ? content : null,
