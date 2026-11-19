@@ -6,11 +6,14 @@ import {
   subtreeContainsLine,
   type OutlineNode,
 } from '../lib/outline';
+import { parseMdContent } from '../lib/parseMdContent';
 import '../styles/outline.css';
 
 interface OutlineProps {
   /** Markdown source; null when no document is available */
   content: string | null;
+  /** Used like the preview does: frontmatter and MDX import/export lines are not headings */
+  filename?: string;
   /** Shown in place of the tree when `content` is null */
   placeholder?: string;
   comments: Comment[];
@@ -139,6 +142,7 @@ const OutlineItem = ({
 
 export const Outline = ({
   content,
+  filename = '',
   placeholder,
   comments,
   activeLine,
@@ -147,7 +151,10 @@ export const Outline = ({
   onToggleCollapsed,
   headerActions,
 }: OutlineProps) => {
-  const headings = useMemo(() => (content === null ? [] : extractHeadings(content)), [content]);
+  const headings = useMemo(
+    () => (content === null ? [] : extractHeadings(parseMdContent(content, filename).body)),
+    [content, filename],
+  );
   const commentLines = useMemo(() => comments.map((c) => c.startLine), [comments]);
   const tree = useMemo(() => buildOutline(headings, commentLines), [headings, commentLines]);
   const parentKeys = useMemo(() => collectParentKeys(tree), [tree]);

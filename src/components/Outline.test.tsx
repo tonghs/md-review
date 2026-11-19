@@ -137,4 +137,24 @@ describe('Outline', () => {
     expect(screen.getByRole('button', { name: 'New title' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Guide' })).not.toBeInTheDocument();
   });
+
+  it('ignores frontmatter and MDX import/export lines, keeping source line numbers', async () => {
+    const onNavigate = vi.fn();
+    const mdx = ['---', 'title: Doc', '---', '', 'import A from "./a"', '', '# Real', ''].join(
+      '\n',
+    );
+    render(
+      <Outline
+        content={mdx}
+        filename="doc.mdx"
+        comments={[]}
+        activeLine={null}
+        onNavigate={onNavigate}
+      />,
+    );
+    const links = screen.getAllByRole('button').filter((b) => b.classList.contains('outline-link'));
+    expect(links.map((b) => b.textContent)).toEqual(['Real']);
+    await userEvent.click(links[0]);
+    expect(onNavigate).toHaveBeenCalledWith(7);
+  });
 });

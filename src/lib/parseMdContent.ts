@@ -1,5 +1,10 @@
 export interface ParsedContent {
   frontmatter: Record<string, string>;
+  /**
+   * Markdown to render. Removed parts (frontmatter, MDX import/export lines)
+   * are replaced with blank lines, so every line keeps its source line number.
+   * Comments, `data-line-start` and the outline all rely on source line numbers.
+   */
   body: string;
 }
 
@@ -14,6 +19,9 @@ function parseFrontmatter(raw: string): Record<string, string> {
   return result;
 }
 
+/** Same number of line breaks as `text`, with no content. */
+const blankLines = (text: string) => '\n'.repeat((text.match(/\n/g) ?? []).length);
+
 export function parseMdContent(content: string, filename: string): ParsedContent {
   const isMdx = filename.endsWith('.mdx');
   let body = content;
@@ -23,14 +31,14 @@ export function parseMdContent(content: string, filename: string): ParsedContent
   const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (fmMatch) {
     frontmatter = parseFrontmatter(fmMatch[1]);
-    body = content.slice(fmMatch[0].length);
+    body = blankLines(fmMatch[0]) + content.slice(fmMatch[0].length);
   }
 
-  // Strip import/export lines for MDX
+  // Blank out import/export lines for MDX
   if (isMdx) {
     body = body
       .split('\n')
-      .filter((line) => !/^(import|export)\s/.test(line))
+      .map((line) => (/^(import|export)\s/.test(line) ? '' : line))
       .join('\n');
   }
 

@@ -58,6 +58,7 @@ export const CliModeApp = () => {
           renderOutline={() => (
             <Outline
               content={content}
+              filename={filename}
               comments={comments}
               activeLine={activeLine}
               onNavigate={navigateToHeading}

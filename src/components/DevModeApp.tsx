@@ -109,6 +109,7 @@ export const DevModeApp = () => {
           renderOutline={(collapsed, onToggleCollapsed) => (
             <Outline
               content={showPreview ? content : null}
+              filename={filename ?? undefined}
               placeholder={outlinePlaceholder}
               comments={comments}
               activeLine={activeLine}
